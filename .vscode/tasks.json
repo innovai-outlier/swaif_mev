@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "MC: Bootstrap",
+      "type": "shell",
+      "command": "./scripts/bootstrap.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "MC: Up (Docker)",
+      "type": "shell",
+      "command": "./scripts/up.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "MC: Down (Docker)",
+      "type": "shell",
+      "command": "./scripts/down.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "MC: Logs (Docker)",
+      "type": "shell",
+      "command": "./scripts/logs.sh",
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "MC: Healthcheck",
+      "type": "shell",
+      "command": "./scripts/health.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "MC: Migrate (API)",
+      "type": "shell",
+      "command": "./scripts/migrate.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "MC: Seed (API)",
+      "type": "shell",
+      "command": "./scripts/seed.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "MC: Reset (DB volumes!)",
+      "type": "shell",
+      "command": "./scripts/reset.sh",
+      "problemMatcher": []
+    }
+  ]
+}

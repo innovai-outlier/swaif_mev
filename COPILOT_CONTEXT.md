@@ -1,0 +1,59 @@
+# Copilot Context — Motor Clínico (Gamificação Lifestyle)
+
+## Objetivo
+Plataforma de gamificação para aderência a hábitos (medicina de estilo de vida).
+MVP: Programas -> Hábitos -> Check-ins -> Pontos/Streak/Badges + Painel Admin.
+
+## Arquitetura (monorepo)
+- services/api: FastAPI (REST) + Postgres + Redis
+- services/worker: Jobs assíncronos (streak, badges, lembretes, rotinas)
+- services/web: Next.js (UI paciente + admin)
+- infra/compose: docker-compose e .env
+- scripts: comandos de operação local
+
+## Regras de engenharia
+- Containers stateless: nada crítico no disco do container.
+- Estado fica em Postgres/Redis/Storage (quando existir).
+- API é a única que fala com DB (web nunca acessa DB direto).
+- Endpoints versionados: /api/v1/...
+- Eventos comportamentais devem ser registráveis (analytics/event table).
+
+## Padrões de código
+Python:
+- Pydantic schemas para request/response
+- SQLAlchemy 2 + Alembic migrations
+- black line-length 100, isort profile black
+- logs em stdout (JSON quando possível)
+
+Web:
+- Consumir API via NEXT_PUBLIC_API_BASE_URL
+- Evitar lógica de negócio complexa no frontend
+
+## Convenções de dados (canônicas)
+Entidades: User, Program, Habit, Enrollment, CheckIn, PointsLedger, Badge, UserBadge, NotificationEvent, Streak.
+Streak: sequência de dias cumpridos por hábito/programa.
+Pontuação: ledger (event-sourced) em vez de coluna "pontos" mutável sem histórico.
+Autenticação: JWT tokens, roles (admin/patient), bcrypt hashing.
+
+## Autenticação e Autorização
+- Sistema de autenticação baseado em JWT (24h expiration)
+- Roles: `admin` (acesso total) e `patient` (acesso limitado)
+- Middleware: `require_admin` para endpoints administrativos
+- Senhas: hash bcrypt via passlib
+
+## Interface Admin
+Páginas disponíveis:
+- `/admin` - Dashboard principal
+- `/admin/analytics` - Métricas e insights do sistema
+- `/admin/rewards-config` - Configuração de pontos
+- `/admin/badges` - Gerenciamento de badges
+- `/admin/programs` - CRUD de programas e hábitos
+- `/admin/patients` - Gerenciamento de usuários
+
+## Comandos úteis
+- Subir stack: ./scripts/up.sh
+- Logs: ./scripts/logs.sh
+- Migrações: ./scripts/migrate.sh
+- Seed básico: ./scripts/seed.sh
+- Criar admin: docker compose exec api python -m app.seed_admin
+- Seed completo (30 pacientes): docker compose exec api python -m app.seed_comprehensive
