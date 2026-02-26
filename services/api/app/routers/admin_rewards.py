@@ -1,5 +1,5 @@
 """Admin router for reward configuration management."""
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List

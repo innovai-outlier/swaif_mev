@@ -1,6 +1,6 @@
 """User dashboard and analytics endpoints."""
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
@@ -102,7 +102,7 @@ def get_user_dashboard(user_id: int, db: Session = Depends(get_db)):
     # Active programs
     active_programs = (
         db.query(func.count(Enrollment.id))
-        .filter(Enrollment.user_id == user_id, Enrollment.is_active == True)
+        .filter(Enrollment.user_id == user_id, Enrollment.is_active)
         .scalar()
     )
 
