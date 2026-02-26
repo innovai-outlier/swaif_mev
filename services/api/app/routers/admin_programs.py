@@ -171,7 +171,7 @@ def delete_program(
     # Check if program has active enrollments
     active_enrollments = (
         db.query(Enrollment)
-        .filter(Enrollment.program_id == program_id, Enrollment.is_active == True)
+        .filter(Enrollment.program_id == program_id, Enrollment.is_active)
         .count()
     )
 

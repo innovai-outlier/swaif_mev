@@ -1,7 +1,7 @@
 """Seed initial data for development and testing."""
 import logging
 from datetime import date, datetime, timedelta
-from app.database import SessionLocal
+from app.database import Base, SessionLocal, engine
 from app.models import (
     Program,
     Habit,
@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 def seed_data():
     """Populate database with initial test data."""
+    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         # Check if data already exists

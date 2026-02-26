@@ -6,14 +6,13 @@ from sqlalchemy import func, and_, cast, Date
 from datetime import datetime, timedelta
 
 from app.database import get_db
-from app.auth import get_current_user, require_admin
+from app.auth import require_admin
 from app.models import (
     User,
     Program,
     Enrollment,
     CheckIn,
     PointsLedger,
-    Streak,
     UserBadge,
     Badge,
 )
@@ -38,7 +37,7 @@ def get_analytics_overview(db: Session = Depends(get_db)) -> Dict[str, Any]:
 
     # Total and active programs
     total_programs = db.query(Program).count()
-    active_programs = db.query(Program).filter(Program.is_active == True).count()
+    active_programs = db.query(Program).filter(Program.is_active).count()
 
     # Total check-ins
     total_checkins = db.query(CheckIn).count()
@@ -47,7 +46,7 @@ def get_analytics_overview(db: Session = Depends(get_db)) -> Dict[str, Any]:
     total_points = db.query(func.sum(PointsLedger.points)).scalar() or 0
 
     # Total enrollments
-    total_enrollments = db.query(Enrollment).filter(Enrollment.is_active == True).count()
+    total_enrollments = db.query(Enrollment).filter(Enrollment.is_active).count()
 
     # Total badges awarded
     total_badges_awarded = db.query(UserBadge).count()
@@ -98,7 +97,7 @@ def get_analytics_overview(db: Session = Depends(get_db)) -> Dict[str, Any]:
             func.count(Enrollment.id).label("enrollment_count")
         )
         .join(Enrollment, Enrollment.program_id == Program.id)
-        .filter(Enrollment.is_active == True)
+        .filter(Enrollment.is_active)
         .group_by(Program.id, Program.name)
         .order_by(func.count(Enrollment.id).desc())
         .limit(5)
@@ -198,7 +197,7 @@ def get_engagement_trends(days: int = 30, db: Session = Depends(get_db)) -> Dict
 @router.get("/program-performance", dependencies=[Depends(require_admin)])
 def get_program_performance(db: Session = Depends(get_db)) -> Dict[str, Any]:
     """Get detailed performance metrics for all programs."""
-    programs = db.query(Program).filter(Program.is_active == True).all()
+    programs = db.query(Program).filter(Program.is_active).all()
 
     results = []
     for program in programs:
@@ -207,7 +206,7 @@ def get_program_performance(db: Session = Depends(get_db)) -> Dict[str, Any]:
             db.query(Enrollment)
             .filter(
                 Enrollment.program_id == program.id,
-                Enrollment.is_active == True
+                Enrollment.is_active
             )
             .count()
         )
