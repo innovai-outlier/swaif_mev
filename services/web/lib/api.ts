@@ -3,10 +3,12 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8
 
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   const response = await fetch(url, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
@@ -14,6 +16,10 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
     throw new Error(error.detail || `API Error: ${response.status}`);
+  }
+
+  if (response.status === 204) {
+    return null;
   }
 
   return response.json();

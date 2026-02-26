@@ -1,6 +1,7 @@
 'use client';
 
 import AdminHeader from '@/components/AdminHeader';
+import { ErrorAlert, PageLoading, StatCard } from '@/components/UIComponents';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
