@@ -14,6 +14,7 @@ from app.models import (
     Streak,
 )
 from app.auth import get_password_hash
+from app.seed_young_forever import seed_young_forever_core
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -410,6 +411,8 @@ def seed_comprehensive_data():
                 )
                 db.add(points)
                 awarded_users.add(streak.user_id)
+
+        seed_young_forever_core(db)
 
         db.commit()
         logger.info("✅ Comprehensive database seed completed successfully!")

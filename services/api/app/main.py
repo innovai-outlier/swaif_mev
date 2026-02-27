@@ -14,6 +14,8 @@ from app.routers import (
     admin_badges,
     admin_programs,
     admin_analytics,
+    protocol_templates,
+    protocol_runs,
 )
 
 app = FastAPI(
@@ -43,6 +45,8 @@ app.include_router(check_ins.router)
 app.include_router(users.router)
 app.include_router(badges.router)
 app.include_router(enrollments.router)
+app.include_router(protocol_templates.router)
+app.include_router(protocol_runs.router)
 
 
 @app.get("/health")

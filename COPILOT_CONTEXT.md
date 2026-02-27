@@ -57,3 +57,28 @@ Páginas disponíveis:
 - Seed básico: ./scripts/seed.sh
 - Criar admin: docker compose exec api python -m app.seed_admin
 - Seed completo (30 pacientes): docker compose exec api python -m app.seed_comprehensive
+
+## Novo domínio: Protocolos Clínicos (Young Forever)
+- Novas entidades: `ProtocolTemplate`, `ProtocolPhase`, `ArtifactDefinition`, `ProtocolRun`, `ArtifactInstance`, `InterventionTemplate`, `ProtocolGeneratedItem`.
+- Fluxo principal: iniciar run -> submeter artefatos (triagem/baseline/wearable) -> computar prioridade (`top_function`) -> gerar intervenções -> avançar fases -> reteste.
+- Integração com MEV: intervenções geram `Habit` com `source_type="protocol"`, `source_ref_id=<run_id>` e `target_metric_key`.
+- `CheckIn` agora suporta métricas estruturadas (`metric_key`, `value_numeric`, `value_text`) mantendo compatibilidade com uso legado.
+- Milestones de protocolo podem gerar pontos em `PointsLedger` usando `event_type="protocol_milestone"`.
+
+### Endpoints novos
+- Admin templates:
+  - `GET /api/v1/admin/protocol-templates/`
+  - `POST /api/v1/admin/protocol-templates/`
+  - `GET /api/v1/admin/protocol-templates/{id}`
+  - `PUT /api/v1/admin/protocol-templates/{id}`
+- Runs:
+  - `POST /api/v1/protocol-runs/`
+  - `GET /api/v1/protocol-runs/{id}`
+  - `POST /api/v1/protocol-runs/{id}/artifacts/{artifact_key}`
+  - `POST /api/v1/protocol-runs/{id}/generate-interventions`
+  - `POST /api/v1/protocol-runs/{id}/advance-phase`
+  - `GET /api/v1/protocol-runs/{id}/timeline`
+
+### Seed
+- Novo seed dedicado: `python -m app.seed_young_forever`.
+- Inclui template `young_forever_core_v1`, fases base, artefatos (`q_7_functions`, `lab_baseline_panel`, `wearable_core`) e intervenções mínimas (sono/movimento/alimentação).

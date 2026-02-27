@@ -15,6 +15,7 @@ def list_habits(
     skip: int = 0,
     limit: int = 100,
     program_id: int = None,
+    source_type: str = None,
     is_active: bool = None,
     db: Session = Depends(get_db),
 ):
@@ -22,6 +23,8 @@ def list_habits(
     query = db.query(Habit)
     if program_id is not None:
         query = query.filter(Habit.program_id == program_id)
+    if source_type is not None:
+        query = query.filter(Habit.source_type == source_type)
     if is_active is not None:
         query = query.filter(Habit.is_active == is_active)
     habits = query.offset(skip).limit(limit).all()

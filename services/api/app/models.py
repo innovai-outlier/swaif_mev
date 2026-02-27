@@ -11,9 +11,14 @@ from sqlalchemy import (
     Date,
     Numeric,
     Index,
+    JSON,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from app.database import Base
+
+
+json_type = JSON().with_variant(JSONB, "postgresql")
 
 
 class User(Base):
@@ -58,6 +63,9 @@ class Habit(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text)
     points_per_completion = Column(Integer, default=10)
+    source_type = Column(String(50), nullable=False, default="manual")
+    source_ref_id = Column(Integer, nullable=True)
+    target_metric_key = Column(String(100), nullable=True)
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -65,6 +73,11 @@ class Habit(Base):
     # Relationships
     program = relationship("Program", back_populates="habits")
     check_ins = relationship("CheckIn", back_populates="habit")
+    protocol_generated_items = relationship("ProtocolGeneratedItem", back_populates="habit")
+
+    __table_args__ = (
+        Index("idx_habits_program_source", "program_id", "source_type", "source_ref_id"),
+    )
 
 
 class Enrollment(Base):
@@ -96,6 +109,9 @@ class CheckIn(Base):
     user_id = Column(Integer, nullable=False, index=True)
     habit_id = Column(Integer, ForeignKey("habits.id"), nullable=False)
     check_in_date = Column(Date, nullable=False)
+    metric_key = Column(String(100), nullable=True)
+    value_numeric = Column(Numeric, nullable=True)
+    value_text = Column(Text, nullable=True)
     notes = Column(Text)
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -105,6 +121,7 @@ class CheckIn(Base):
     # Prevent duplicate check-ins for same habit on same day
     __table_args__ = (
         Index("idx_user_habit_date", "user_id", "habit_id", "check_in_date", unique=True),
+        Index("idx_checkins_user_metric_date", "user_id", "metric_key", "check_in_date"),
     )
 
 
@@ -205,3 +222,157 @@ class RewardConfig(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+
+class ProtocolTemplate(Base):
+    """Versioned clinical protocol template."""
+
+    __tablename__ = "protocol_templates"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(100), nullable=False, unique=True, index=True)
+    name = Column(String(255), nullable=False)
+    version = Column(String(50), nullable=False)
+    description = Column(Text)
+    is_active = Column(Boolean, default=True)
+    default_program_id = Column(Integer, ForeignKey("programs.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    phases = relationship("ProtocolPhase", back_populates="protocol_template", cascade="all, delete-orphan")
+    artifact_definitions = relationship(
+        "ArtifactDefinition", back_populates="protocol_template", cascade="all, delete-orphan"
+    )
+    intervention_templates = relationship(
+        "InterventionTemplate", back_populates="protocol_template", cascade="all, delete-orphan"
+    )
+
+
+class ProtocolPhase(Base):
+    """Ordered protocol phase definition."""
+
+    __tablename__ = "protocol_phases"
+
+    id = Column(Integer, primary_key=True, index=True)
+    protocol_template_id = Column(Integer, ForeignKey("protocol_templates.id"), nullable=False, index=True)
+    name = Column(String(255), nullable=False)
+    phase_key = Column(String(50), nullable=False)
+    phase_order = Column(Integer, nullable=False)
+    entry_criteria_json = Column(json_type, nullable=True)
+    exit_criteria_json = Column(json_type, nullable=True)
+
+    protocol_template = relationship("ProtocolTemplate", back_populates="phases")
+    runs = relationship("ProtocolRun", back_populates="current_phase")
+
+    __table_args__ = (
+        Index("idx_protocol_phase_template_order", "protocol_template_id", "phase_order", unique=True),
+    )
+
+
+class ArtifactDefinition(Base):
+    """Definitions for protocol artifacts/questionnaires/labs."""
+
+    __tablename__ = "artifact_definitions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    protocol_template_id = Column(Integer, ForeignKey("protocol_templates.id"), nullable=False, index=True)
+    artifact_key = Column(String(100), nullable=False)
+    type = Column(String(50), nullable=False)
+    name = Column(String(255), nullable=False)
+    schema_json = Column(json_type, nullable=True)
+    scoring_json = Column(json_type, nullable=True)
+
+    protocol_template = relationship("ProtocolTemplate", back_populates="artifact_definitions")
+    instances = relationship("ArtifactInstance", back_populates="artifact_definition")
+
+    __table_args__ = (
+        Index("idx_artifact_definition_template_key", "protocol_template_id", "artifact_key", unique=True),
+    )
+
+
+class ProtocolRun(Base):
+    """Protocol execution instance for a patient."""
+
+    __tablename__ = "protocol_runs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    protocol_template_id = Column(Integer, ForeignKey("protocol_templates.id"), nullable=False, index=True)
+    status = Column(String(50), nullable=False, default="active")
+    current_phase_id = Column(Integer, ForeignKey("protocol_phases.id"), nullable=True)
+    started_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    protocol_template = relationship("ProtocolTemplate")
+    current_phase = relationship("ProtocolPhase", back_populates="runs")
+    artifact_instances = relationship("ArtifactInstance", back_populates="protocol_run", cascade="all, delete-orphan")
+    generated_items = relationship("ProtocolGeneratedItem", back_populates="protocol_run", cascade="all, delete-orphan")
+
+    __table_args__ = (
+        Index("idx_protocol_runs_user_status", "user_id", "status"),
+    )
+
+
+class ArtifactInstance(Base):
+    """Collected artifact payload instances for a protocol run."""
+
+    __tablename__ = "artifact_instances"
+
+    id = Column(Integer, primary_key=True, index=True)
+    protocol_run_id = Column(Integer, ForeignKey("protocol_runs.id"), nullable=False, index=True)
+    artifact_definition_id = Column(Integer, ForeignKey("artifact_definitions.id"), nullable=False, index=True)
+    collected_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    payload_json = Column(json_type, nullable=True)
+    computed_json = Column(json_type, nullable=True)
+    source = Column(String(50), nullable=True)
+
+    protocol_run = relationship("ProtocolRun", back_populates="artifact_instances")
+    artifact_definition = relationship("ArtifactDefinition", back_populates="instances")
+
+    __table_args__ = (
+        Index(
+            "idx_artifact_instances_run_definition_collected",
+            "protocol_run_id",
+            "artifact_definition_id",
+            "collected_at",
+        ),
+    )
+
+
+class InterventionTemplate(Base):
+    """Protocol intervention templates used to generate executable actions."""
+
+    __tablename__ = "intervention_templates"
+
+    id = Column(Integer, primary_key=True, index=True)
+    protocol_template_id = Column(Integer, ForeignKey("protocol_templates.id"), nullable=False, index=True)
+    intervention_key = Column(String(100), nullable=False)
+    type = Column(String(50), nullable=False)
+    name = Column(String(255), nullable=False)
+    description = Column(Text)
+    habit_blueprint_json = Column(json_type, nullable=True)
+    activation_rules_json = Column(json_type, nullable=True)
+
+    protocol_template = relationship("ProtocolTemplate", back_populates="intervention_templates")
+    generated_items = relationship("ProtocolGeneratedItem", back_populates="intervention_template")
+
+    __table_args__ = (
+        Index("idx_intervention_template_key", "protocol_template_id", "intervention_key", unique=True),
+    )
+
+
+class ProtocolGeneratedItem(Base):
+    """Track entities generated from interventions for a protocol run."""
+
+    __tablename__ = "protocol_generated_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    protocol_run_id = Column(Integer, ForeignKey("protocol_runs.id"), nullable=False, index=True)
+    intervention_template_id = Column(Integer, ForeignKey("intervention_templates.id"), nullable=False, index=True)
+    generated_habit_id = Column(Integer, ForeignKey("habits.id"), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    protocol_run = relationship("ProtocolRun", back_populates="generated_items")
+    intervention_template = relationship("InterventionTemplate", back_populates="generated_items")
+    habit = relationship("Habit", back_populates="protocol_generated_items")
