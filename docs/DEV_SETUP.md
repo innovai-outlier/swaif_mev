@@ -24,6 +24,7 @@ O ponto único de entrada é `./scripts/run.sh --mode onprem|docker <comando>`.
    - `cp config/.env.onprem.example config/.env.onprem`
 2. Bootstrap on-prem:
    - `./scripts/run.sh --mode onprem bootstrap`
+   - O bootstrap gera automaticamente `JWT_SECRET_KEY` forte quando necessário.
 3. Aplicar migrações sem Docker:
    - `./scripts/run.sh --mode onprem migrate`
    - (equivalente direto: `alembic upgrade head` em `services/api`)
@@ -50,6 +51,7 @@ O ponto único de entrada é `./scripts/run.sh --mode onprem|docker <comando>`.
    - `cp infra/compose/.env.example infra/compose/.env`
 2. Bootstrap:
    - `./scripts/run.sh --mode docker bootstrap`
+   - O bootstrap gera automaticamente `JWT_SECRET_KEY` forte quando necessário.
 3. Subir stack:
    - `./scripts/run.sh --mode docker up`
 4. Healthcheck:
