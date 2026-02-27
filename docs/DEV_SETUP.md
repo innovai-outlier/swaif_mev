@@ -87,7 +87,23 @@ O ponto único de entrada é `./scripts/run.sh --mode onprem|docker <comando>`.
 - ⚠️ Remove todos os volumes do Docker incluindo dados do banco
 - Após reset, executar migrações e seed novamente
 
-## Validação de configuração (secrets)
-- Executar antes de subir em produção:
-  - `cd services/api && python -m app.config_check`
-- Referência operacional (rotação e backup/restore): `docs/OPS_SECRET_MANAGEMENT.md`
+
+## Worker on-prem: registro e monitoramento do processo
+No modo on-prem, o instalador (`./scripts/run.sh --mode onprem bootstrap`) prepara diretórios de runtime em `.runtime/onprem` para registrar PID e logs. O processo do worker é gerenciado por `scripts/onprem/worker.sh`, que delega para funções comuns de serviço (`start_service`, `stop_service`, `status_service`) em `scripts/onprem/common.sh`.
+
+### Como o registro funciona
+- **Start**: `./scripts/run.sh --mode onprem up` executa `worker.sh start`, iniciando `python -m app.main` com `nohup`.
+- **PID file**: o PID fica em `.runtime/onprem/pids/worker.pid`.
+- **Logs**: saída padrão e erro vão para `.runtime/onprem/logs/worker.log`.
+- **Recuperação de PID stale**: ao iniciar, se o PID existir mas não estiver vivo, ele é removido automaticamente antes do novo start.
+
+### Como monitorar e operar
+- **Status rápido**: `./scripts/run.sh --mode onprem status`
+- **Logs em tempo real**: `./scripts/run.sh --mode onprem logs`
+- **Parada graciosa**: `./scripts/run.sh --mode onprem down` (com fallback para `kill -9` se necessário).
+
+### Variáveis recomendadas para o worker
+- `CELERY_BROKER_URL` (opcional; fallback para `REDIS_URL`)
+- `CELERY_RESULT_BACKEND` (opcional; fallback para `REDIS_URL`)
+- `CELERY_RUN_MODE=worker|beat|both` (padrão: `both`)
+- `STREAK_RECALC_CRON`, `BADGE_ASSIGN_CRON`, `REMINDER_CRON` para customizar agenda

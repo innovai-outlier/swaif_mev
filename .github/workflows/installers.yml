@@ -1,0 +1,69 @@
+name: Build Installers
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-installers:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Linux installers
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          bash installer/platform/linux/build_linux_packages.sh --version "$VERSION" --output-dir dist/installers
+
+      - name: Build macOS installers
+        if: matrix.os == 'macos-latest'
+        run: |
+          bash installer/platform/macos/build_macos_pkg.sh --version "$VERSION" --output-dir dist/installers
+
+      - name: Build Windows installers
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          ./installer/platform/windows/build_windows_installers.ps1 -Version "$env:VERSION" -OutputDir "dist/installers"
+
+      - name: Generate checksums
+        shell: bash
+        run: |
+          cd dist/installers
+          shopt -s nullglob
+          files=(*)
+          if [ ${#files[@]} -gt 0 ]; then
+            sha256sum "${files[@]}" > checksums.txt
+          else
+            echo "No installer artifacts were produced" > checksums.txt
+            exit 1
+          fi
+
+      - name: Optional signing (cosign key)
+        shell: bash
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+        run: |
+          if [ -n "${COSIGN_PRIVATE_KEY}" ] && command -v cosign >/dev/null 2>&1; then
+            cd dist/installers
+            for f in *; do
+              [ -f "$f" ] || continue
+              cosign sign-blob --yes --key env://COSIGN_PRIVATE_KEY --output-signature "$f.sig" "$f"
+            done
+          else
+            echo "cosign signing skipped"
+          fi
+
+      - name: Upload installer artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: installers-${{ matrix.os }}
+          path: dist/installers/
