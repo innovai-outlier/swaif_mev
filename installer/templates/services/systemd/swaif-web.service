@@ -1,0 +1,14 @@
+[Unit]
+Description=SWAIF MEV Web
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=@INSTALL_DIR@
+EnvironmentFile=@INSTALL_DIR@/config/web.env
+ExecStart=/usr/bin/env bash -lc "cd services/web && npm run start -- --port @WEB_PORT@"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
