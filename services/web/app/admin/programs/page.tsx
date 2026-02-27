@@ -469,7 +469,7 @@ export default function AdminProgramsPage() {
 
                   {formData.habits.length === 0 && (
                     <p className="text-sm text-gray-500 text-center py-4">
-                      Nenhum hábito adicionado. Clique em "Adicionar Hábito" para começar.
+                      Nenhum hábito adicionado. Clique em &quot;Adicionar Hábito&quot; para começar.
                     </p>
                   )}
                 </div>

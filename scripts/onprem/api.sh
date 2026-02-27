@@ -9,7 +9,7 @@ ACTION="${1:-start}"
 
 case "$ACTION" in
   start)
-    start_service "api" "$ROOT_DIR/services/api" "uvicorn app.main:app --host 0.0.0.0 --port ${API_PORT:-8000}"
+    start_service "api" "$ROOT_DIR/services/api" "${API_START_CMD:-uvicorn app.main:app --host 0.0.0.0 --port ${API_PORT:-8000}}"
     ;;
   stop)
     stop_service "api"
