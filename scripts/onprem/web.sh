@@ -9,7 +9,7 @@ ACTION="${1:-start}"
 
 case "$ACTION" in
   start)
-    start_service "web" "$ROOT_DIR/services/web" "npm run build && next start -p ${WEB_PORT:-3000}"
+    start_service "web" "$ROOT_DIR/services/web" "${WEB_START_CMD:-npm run build && next start -p ${WEB_PORT:-3000}}"
     ;;
   stop)
     stop_service "web"
