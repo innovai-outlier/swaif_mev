@@ -1,0 +1,14 @@
+[Unit]
+Description=SWAIF MEV API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=@INSTALL_DIR@
+EnvironmentFile=@INSTALL_DIR@/config/api.env
+ExecStart=/usr/bin/env bash -lc "cd services/api && uvicorn app.main:app --host 0.0.0.0 --port @API_PORT@"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

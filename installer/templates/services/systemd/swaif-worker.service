@@ -1,0 +1,14 @@
+[Unit]
+Description=SWAIF MEV Worker
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=@INSTALL_DIR@
+EnvironmentFile=@INSTALL_DIR@/config/worker.env
+ExecStart=/usr/bin/env bash -lc "cd services/worker && python -m app.main"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
