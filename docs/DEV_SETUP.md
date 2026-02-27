@@ -1,32 +1,63 @@
 # DEV_SETUP (Local)
 
-## Pré-requisitos
-- Docker + Docker Compose
-- VSCode
-- (Recomendado no Windows) WSL2
+## Modos de execução suportados
+- **On-prem (host OS)**: serviços API/Web/Worker rodam direto no sistema operacional local.
+- **Docker Compose**: mantém o fluxo já existente em containers.
 
-## Primeiro boot
+O ponto único de entrada é `./scripts/run.sh --mode onprem|docker <comando>`.
+
+## Pré-requisitos
+### On-prem (host OS)
+- Python 3.11+
+- Node.js 20+
+- PostgreSQL e Redis rodando localmente (ou apontados via env)
+- Dependências instaladas em:
+  - `services/api` (inclui alembic, uvicorn)
+  - `services/worker`
+  - `services/web` (`npm install`)
+
+### Docker
+- Docker + Docker Compose
+
+## Primeiro boot (On-prem recomendado)
+1. Criar env on-prem:
+   - `cp config/.env.onprem.example config/.env.onprem`
+2. Bootstrap on-prem:
+   - `./scripts/run.sh --mode onprem bootstrap`
+3. Aplicar migrações sem Docker:
+   - `./scripts/run.sh --mode onprem migrate`
+   - (equivalente direto: `alembic upgrade head` em `services/api`)
+4. Popular dados iniciais sem Docker:
+   - Seed básico: `./scripts/run.sh --mode onprem seed`
+   - Seed admin: `./scripts/run.sh --mode onprem seed-admin`
+     - (equivalente direto: `python -m app.seed_admin` em `services/api`)
+   - Seed completo: `./scripts/run.sh --mode onprem seed-comprehensive`
+     - (equivalente direto: `python -m app.seed_comprehensive` em `services/api`)
+5. Subir stack on-prem:
+   - `./scripts/run.sh --mode onprem up`
+6. Healthcheck:
+   - `./scripts/run.sh --mode onprem health`
+
+## Operação diária (On-prem)
+- Status: `./scripts/run.sh --mode onprem status`
+- Logs: `./scripts/run.sh --mode onprem logs`
+- Migrações: `./scripts/run.sh --mode onprem migrate`
+- Seeds: `./scripts/run.sh --mode onprem seed-admin` / `seed-comprehensive`
+- Desligar: `./scripts/run.sh --mode onprem down`
+
+## Fluxo Docker (permanece suportado)
 1. Copiar env:
    - `cp infra/compose/.env.example infra/compose/.env`
 2. Bootstrap:
-   - `./scripts/bootstrap.sh`
+   - `./scripts/run.sh --mode docker bootstrap`
 3. Subir stack:
-   - `./scripts/up.sh`
+   - `./scripts/run.sh --mode docker up`
 4. Healthcheck:
-   - `./scripts/health.sh`
-5. Aplicar migrações:
-   - `./scripts/migrate.sh`
-6. Popular dados iniciais:
-   - Criar admin: `docker compose -f infra/compose/docker-compose.yml exec api python -m app.seed_admin`
-   - Criar dados completos: `docker compose -f infra/compose/docker-compose.yml exec api python -m app.seed_comprehensive`
-
-## Operação diária
-- Logs: `./scripts/logs.sh`
-- Migrações: `./scripts/migrate.sh`
-- Seed básico: `./scripts/seed.sh`
-- Seed admin: Criar usuário admin@mev.com
-- Seed completo: 30 pacientes + programas + histórico de check-ins
-- Desligar: `./scripts/down.sh`
+   - `./scripts/run.sh --mode docker health`
+5. Migrações e seed:
+   - `./scripts/run.sh --mode docker migrate`
+   - `./scripts/run.sh --mode docker seed-admin`
+   - `./scripts/run.sh --mode docker seed-comprehensive`
 
 ## URLs
 - Web: http://localhost:3000
@@ -49,7 +80,7 @@
 - Registro: `POST /api/v1/auth/register`
 - Usuários: `GET /api/v1/auth/users` (apenas admin)
 
-## Reset total (APAGA DB)
+## Reset total (Docker / APAGA DB)
 - `./scripts/reset.sh`
 - ⚠️ Remove todos os volumes do Docker incluindo dados do banco
 - Após reset, executar migrações e seed novamente
