@@ -3,8 +3,6 @@
 import { ChartBarIcon, FireIcon, SparklesIcon, TrophyIcon } from '@heroicons/react/24/outline';
 import { useEffect, useState } from 'react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000';
-
 interface LeaderboardEntry {
   user_id: number;
   total_points: number;
