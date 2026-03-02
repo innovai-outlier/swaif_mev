@@ -21,6 +21,45 @@ from app.database import Base
 json_type = JSON().with_variant(JSONB, "postgresql")
 
 
+class Reminder(Base):
+    """Scheduled reminders for habit check-ins."""
+
+    __tablename__ = "reminders"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)
+    habit_id = Column(Integer, ForeignKey("habits.id"), nullable=False)
+    scheduled_for = Column(DateTime, nullable=False)
+    sent_at = Column(DateTime, nullable=True)
+    status = Column(String(20), default="pending")  # pending, sent, failed
+    message = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    habit = relationship("Habit")
+"""SQLAlchemy models for Motor Clínico MVP."""
+from datetime import datetime
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Text,
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Date,
+    Numeric,
+    Index,
+    JSON,
+)
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import relationship
+from app.database import Base
+
+
+json_type = JSON().with_variant(JSONB, "postgresql")
+
+
 class User(Base):
     """User accounts with role-based access."""
 

@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,7 +17,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/v1/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -52,7 +53,9 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
       <div className="bg-white p-8 rounded-lg shadow-2xl w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">Motor Clínico</h1>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Motor Clínico
+          </h1>
           <p className="text-gray-600">Sistema de Gamificação de Saúde</p>
         </div>
 
@@ -64,7 +67,10 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Email
             </label>
             <input
@@ -79,7 +85,10 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Senha
             </label>
             <input

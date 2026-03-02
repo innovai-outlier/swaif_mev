@@ -306,40 +306,44 @@ def seed_comprehensive_data():
 
                         # Random chance of check-in based on activity factor
                         if random.random() < activity_factor:
-                            try:
-                                check_in = CheckIn(
-                                    user_id=patient.id,
-                                    habit_id=habit.id,
-                                    check_in_date=check_date,
-                                    notes=f"Check-in automático - {habit.name}",
-                                    created_at=datetime.combine(check_date, datetime.min.time()),
-                                )
-                                db.add(check_in)
+                            # Check for existing check-in to avoid duplicates
+                            existing_checkin = db.query(CheckIn).filter_by(
+                                user_id=patient.id,
+                                habit_id=habit.id,
+                                check_in_date=check_date
+                            ).first()
+                            if existing_checkin:
+                                # Skip duplicate
+                                continue
+                            check_in = CheckIn(
+                                user_id=patient.id,
+                                habit_id=habit.id,
+                                check_in_date=check_date,
+                                notes=f"Check-in automático - {habit.name}",
+                                created_at=datetime.combine(check_date, datetime.min.time()),
+                            )
+                            db.add(check_in)
 
-                                # Award points
-                                points = PointsLedger(
-                                    user_id=patient.id,
-                                    program_id=enrollment.program_id,
-                                    points=habit.points_per_completion,
-                                    event_type="check_in",
-                                    event_reference_id=None,  # Will be set after flush
-                                    description=f"Check-in: {habit.name}",
-                                    created_at=datetime.combine(check_date, datetime.min.time()),
-                                )
-                                db.add(points)
+                            # Award points
+                            points = PointsLedger(
+                                user_id=patient.id,
+                                program_id=enrollment.program_id,
+                                points=habit.points_per_completion,
+                                event_type="check_in",
+                                event_reference_id=None,  # Will be set after flush
+                                description=f"Check-in: {habit.name}",
+                                created_at=datetime.combine(check_date, datetime.min.time()),
+                            )
+                            db.add(points)
 
-                                # Update streak tracking
-                                if last_checkin_date is None or (check_date - last_checkin_date).days == 1:
-                                    current_streak += 1
-                                else:
-                                    current_streak = 1
+                            # Update streak tracking
+                            if last_checkin_date is None or (check_date - last_checkin_date).days == 1:
+                                current_streak += 1
+                            else:
+                                current_streak = 1
 
-                                longest_streak = max(longest_streak, current_streak)
-                                last_checkin_date = check_date
-
-                            except Exception as e:
-                                # Skip duplicates
-                                pass
+                            longest_streak = max(longest_streak, current_streak)
+                            last_checkin_date = check_date
                         else:
                             # Missed check-in, reset current streak
                             current_streak = 0

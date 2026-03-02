@@ -45,6 +45,24 @@
       "problemMatcher": []
     },
     {
+      "label": "MC: Seed Admin (API)",
+      "type": "shell",
+      "command": "docker compose -f infra/compose/docker-compose.yml exec api python -m app.seed_admin",
+      "problemMatcher": []
+    },
+    {
+      "label": "MC: Seed Completa (API)",
+      "type": "shell",
+      "command": "docker compose -f infra/compose/docker-compose.yml exec api python -m app.seed_comprehensive",
+      "problemMatcher": []
+    },
+    {
+      "label": "MC: Seed Young Forever (API)",
+      "type": "shell",
+      "command": "docker compose -f infra/compose/docker-compose.yml exec api python -m app.seed_young_forever",
+      "problemMatcher": []
+    },
+    {
       "label": "MC: Reset (DB volumes!)",
       "type": "shell",
       "command": "./scripts/reset.sh",

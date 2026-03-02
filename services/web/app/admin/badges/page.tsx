@@ -1,5 +1,6 @@
 "use client";
 
+import { API_BASE_URL } from "@/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -49,7 +50,7 @@ export default function AdminBadgesPage() {
 
   const fetchBadges = async (token: string) => {
     try {
-      const response = await fetch("http://localhost:8000/api/v1/admin/badges/", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/admin/badges/`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -105,8 +106,8 @@ export default function AdminBadgesPage() {
       if (!token) throw new Error("No authentication token");
 
       const url = editingBadge
-        ? `http://localhost:8000/api/v1/admin/badges/${editingBadge.id}`
-        : "http://localhost:8000/api/v1/admin/badges/";
+        ? `${API_BASE_URL}/api/v1/admin/badges/${editingBadge.id}`
+        : `${API_BASE_URL}/api/v1/admin/badges/`;
 
       const method = editingBadge ? "PUT" : "POST";
 
@@ -134,7 +135,8 @@ export default function AdminBadgesPage() {
   };
 
   const handleDelete = async (badgeId: number, badgeName: string) => {
-    if (!confirm(`Tem certeza que deseja excluir o badge "${badgeName}"?`)) return;
+    if (!confirm(`Tem certeza que deseja excluir o badge "${badgeName}"?`))
+      return;
 
     setError("");
     setSuccess("");
@@ -143,12 +145,15 @@ export default function AdminBadgesPage() {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token");
 
-      const response = await fetch(`http://localhost:8000/api/v1/admin/badges/${badgeId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/admin/badges/${badgeId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         const data = await response.json();
@@ -163,7 +168,21 @@ export default function AdminBadgesPage() {
     }
   };
 
-  const commonIcons = ["🏆", "⭐", "🎯", "💪", "🔥", "✨", "🌟", "👑", "💎", "🎖️", "🥇", "🥈", "🥉"];
+  const commonIcons = [
+    "🏆",
+    "⭐",
+    "🎯",
+    "💪",
+    "🔥",
+    "✨",
+    "🌟",
+    "👑",
+    "💎",
+    "🎖️",
+    "🥇",
+    "🥈",
+    "🥉",
+  ];
 
   if (loading) {
     return <div className="p-8">Carregando...</div>;
@@ -177,11 +196,23 @@ export default function AdminBadgesPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link href="/admin" className="text-gray-500 hover:text-gray-700">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
                 </svg>
               </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Gerenciar Badges</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Gerenciar Badges
+              </h1>
             </div>
             <button
               onClick={() => handleOpenModal()}
@@ -211,21 +242,30 @@ export default function AdminBadgesPage() {
           {/* Badges Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {badges.map((badge) => (
-              <div key={badge.id} className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow">
+              <div
+                key={badge.id}
+                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow"
+              >
                 <div className="p-6">
                   <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                       <span className="text-4xl">{badge.icon}</span>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{badge.name}</h3>
-                        <p className="text-sm text-gray-600">{badge.description}</p>
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {badge.name}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {badge.description}
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {badge.criteria && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 font-medium">Critério:</p>
+                      <p className="text-xs text-gray-500 font-medium">
+                        Critério:
+                      </p>
                       <p className="text-sm text-gray-700">{badge.criteria}</p>
                     </div>
                   )}
@@ -240,8 +280,18 @@ export default function AdminBadgesPage() {
                         className="text-blue-600 hover:text-blue-800 p-2"
                         title="Editar"
                       >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        <svg
+                          className="h-5 w-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                          />
                         </svg>
                       </button>
                       <button
@@ -249,8 +299,18 @@ export default function AdminBadgesPage() {
                         className="text-red-600 hover:text-red-800 p-2"
                         title="Excluir"
                       >
-                        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        <svg
+                          className="h-5 w-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -262,7 +322,9 @@ export default function AdminBadgesPage() {
 
           {badges.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500">Nenhum badge cadastrado. Crie o primeiro!</p>
+              <p className="text-gray-500">
+                Nenhum badge cadastrado. Crie o primeiro!
+              </p>
             </div>
           )}
         </div>
@@ -286,11 +348,15 @@ export default function AdminBadgesPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nome *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nome *
+                </label>
                 <input
                   type="text"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ex: Iniciante"
                   required
@@ -298,10 +364,14 @@ export default function AdminBadgesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Descrição
+                </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ex: Completou o primeiro check-in"
                   rows={2}
@@ -309,14 +379,18 @@ export default function AdminBadgesPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Ícone</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ícone
+                </label>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {commonIcons.map((icon) => (
                     <button
                       key={icon}
                       onClick={() => setFormData({ ...formData, icon })}
                       className={`text-2xl p-2 rounded border-2 ${
-                        formData.icon === icon ? "border-blue-500 bg-blue-50" : "border-gray-200"
+                        formData.icon === icon
+                          ? "border-blue-500 bg-blue-50"
+                          : "border-gray-200"
                       }`}
                     >
                       {icon}
@@ -326,29 +400,42 @@ export default function AdminBadgesPage() {
                 <input
                   type="text"
                   value={formData.icon}
-                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, icon: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ou digite um emoji personalizado"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Critério de Desbloqueio</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Critério de Desbloqueio
+                </label>
                 <input
                   type="text"
                   value={formData.criteria}
-                  onChange={(e) => setFormData({ ...formData, criteria: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, criteria: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ex: 7 dias consecutivos de check-in"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Pontos de Recompensa</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Pontos de Recompensa
+                </label>
                 <input
                   type="number"
                   value={formData.points_reward}
-                  onChange={(e) => setFormData({ ...formData, points_reward: parseInt(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      points_reward: parseInt(e.target.value) || 0,
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   min="0"
                 />

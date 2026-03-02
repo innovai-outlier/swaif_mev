@@ -1,6 +1,7 @@
 "use client";
 
 import AdminHeader from "@/components/AdminHeader";
+import { API_BASE_URL } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -46,7 +47,7 @@ export default function AdminPatientsPage() {
 
   const fetchUsers = async (token: string) => {
     try {
-      const response = await fetch("http://localhost:8000/api/v1/auth/users", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/users`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -97,7 +98,7 @@ export default function AdminPatientsPage() {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token");
 
-      const response = await fetch("http://localhost:8000/api/v1/auth/register", {
+      const response = await fetch(`${API_BASE_URL}/api/v1/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -179,8 +180,12 @@ export default function AdminPatientsPage() {
           {/* Page Title */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Gerenciar Usuários</h1>
-              <p className="text-gray-600 mt-2">Visualize e gerencie todas as contas de usuários</p>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Gerenciar Usuários
+              </h1>
+              <p className="text-gray-600 mt-2">
+                Visualize e gerencie todas as contas de usuários
+              </p>
             </div>
             <button
               onClick={handleOpenModal}
@@ -207,13 +212,27 @@ export default function AdminPatientsPage() {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <svg
+                    className="h-6 w-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total de Usuários</p>
-                  <p className="text-2xl font-bold text-gray-900">{users.length}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total de Usuários
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {users.length}
+                  </p>
                 </div>
               </div>
             </div>
@@ -221,13 +240,25 @@ export default function AdminPatientsPage() {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-green-500 rounded-md p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  <svg
+                    className="h-6 w-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
                   <p className="text-sm font-medium text-gray-600">Pacientes</p>
-                  <p className="text-2xl font-bold text-gray-900">{patients.length}</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {patients.length}
+                  </p>
                 </div>
               </div>
             </div>
@@ -235,13 +266,27 @@ export default function AdminPatientsPage() {
             <div className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0 bg-purple-500 rounded-md p-3">
-                  <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  <svg
+                    className="h-6 w-6 text-white"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Administradores</p>
-                  <p className="text-2xl font-bold text-gray-900">{admins.length}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Administradores
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {admins.length}
+                  </p>
                 </div>
               </div>
             </div>
@@ -250,7 +295,9 @@ export default function AdminPatientsPage() {
           {/* Users Table */}
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Todos os Usuários</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Todos os Usuários
+              </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -283,10 +330,14 @@ export default function AdminPatientsPage() {
                         {user.id}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{user.full_name}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.full_name}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{user.email}</div>
+                        <div className="text-sm text-gray-900">
+                          {user.email}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getRoleBadge(user.role)}
@@ -298,7 +349,9 @@ export default function AdminPatientsPage() {
                         {user.role === "patient" && (
                           <button
                             className="text-blue-600 hover:text-blue-800 font-medium"
-                            onClick={() => router.push(`/admin/patients/${user.id}`)}
+                            onClick={() =>
+                              router.push(`/admin/patients/${user.id}`)
+                            }
                           >
                             Ver Progresso
                           </button>
@@ -324,7 +377,9 @@ export default function AdminPatientsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Novo Usuário</h2>
+              <h2 className="text-xl font-semibold text-gray-900">
+                Novo Usuário
+              </h2>
             </div>
 
             <div className="px-6 py-4 space-y-4">
@@ -335,11 +390,15 @@ export default function AdminPatientsPage() {
               )}
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Nome Completo *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nome Completo *
+                </label>
                 <input
                   type="text"
                   value={formData.full_name}
-                  onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, full_name: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="João Silva"
                   required
@@ -347,11 +406,15 @@ export default function AdminPatientsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email *
+                </label>
                 <input
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="joao@example.com"
                   required
@@ -359,11 +422,15 @@ export default function AdminPatientsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Senha *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Senha *
+                </label>
                 <input
                   type="password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Mínimo 6 caracteres"
                   required
@@ -371,10 +438,17 @@ export default function AdminPatientsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tipo de Usuário *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tipo de Usuário *
+                </label>
                 <select
                   value={formData.role}
-                  onChange={(e) => setFormData({ ...formData, role: e.target.value as "patient" | "admin" })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      role: e.target.value as "patient" | "admin",
+                    })
+                  }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="patient">Paciente</option>
@@ -392,7 +466,9 @@ export default function AdminPatientsPage() {
               </button>
               <button
                 onClick={handleCreateUser}
-                disabled={!formData.email || !formData.full_name || !formData.password}
+                disabled={
+                  !formData.email || !formData.full_name || !formData.password
+                }
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Criar Usuário

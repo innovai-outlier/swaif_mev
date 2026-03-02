@@ -156,39 +156,52 @@ def get_engagement_trends(days: int = 30, db: Session = Depends(get_db)) -> Dict
     start_date = datetime.utcnow() - timedelta(days=days)
 
     # Daily check-ins
+    # For SQLite, cast to string to avoid fromisoformat errors
+    import sqlalchemy
+    if db.bind.dialect.name == "sqlite":
+        date_cast = func.strftime('%Y-%m-%d', CheckIn.check_in_date)
+    else:
+        date_cast = cast(CheckIn.check_in_date, Date)
+
     daily_checkins = (
         db.query(
-            cast(CheckIn.check_in_date, Date).label("date"),
+            date_cast.label("date"),
             func.count(CheckIn.id).label("count")
         )
         .filter(CheckIn.created_at >= start_date)
-        .group_by(cast(CheckIn.check_in_date, Date))
-        .order_by(cast(CheckIn.check_in_date, Date))
+        .group_by(date_cast)
+        .order_by(date_cast)
         .all()
     )
 
-    # Daily unique active users
     daily_users = (
         db.query(
-            cast(CheckIn.check_in_date, Date).label("date"),
+            date_cast.label("date"),
             func.count(func.distinct(CheckIn.user_id)).label("unique_users")
         )
         .filter(CheckIn.created_at >= start_date)
-        .group_by(cast(CheckIn.check_in_date, Date))
-        .order_by(cast(CheckIn.check_in_date, Date))
+        .group_by(date_cast)
+        .order_by(date_cast)
         .all()
     )
 
+    def serialize_date(val):
+        # Try isoformat, fallback to str
+        try:
+            return val.isoformat()
+        except Exception:
+            return str(val)
+
     return {
         "period_days": days,
-        "start_date": start_date.date().isoformat(),
-        "end_date": datetime.utcnow().date().isoformat(),
+        "start_date": serialize_date(start_date.date()),
+        "end_date": serialize_date(datetime.utcnow().date()),
         "daily_checkins": [
-            {"date": str(row.date), "count": row.count}
+            {"date": serialize_date(row.date), "count": row.count}
             for row in daily_checkins
         ],
         "daily_active_users": [
-            {"date": str(row.date), "unique_users": row.unique_users}
+            {"date": serialize_date(row.date), "unique_users": row.unique_users}
             for row in daily_users
         ],
     }

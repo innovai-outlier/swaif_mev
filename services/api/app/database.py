@@ -3,12 +3,11 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg://mevuser:mevpass@db:5432/mevdb")
-
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg://mevuser:mevpass@localhost:5432/mevdb")
 engine = create_engine(DATABASE_URL, echo=True if os.getenv("APP_ENV") == "local" else False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
-
 
 def get_db():
     """Dependency for FastAPI routes."""

@@ -1,7 +1,28 @@
+
 """Pydantic schemas for request/response validation."""
 from datetime import date, datetime
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
+
+# ============= Reminder Schemas =============
+class ReminderBase(BaseModel):
+    user_id: int
+    habit_id: int
+    scheduled_for: datetime
+    message: Optional[str] = None
+    status: Optional[str] = "pending"
+
+class ReminderCreate(ReminderBase):
+    pass
+
+class ReminderResponse(ReminderBase):
+    id: int
+    sent_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 
 # ============= Program Schemas =============
@@ -26,8 +47,7 @@ class ProgramResponse(ProgramBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = dict(from_attributes=True)
 
 
 # ============= Habit Schemas =============
@@ -58,8 +78,7 @@ class HabitResponse(HabitBase):
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = dict(from_attributes=True)
 
 
 # ============= Enrollment Schemas =============

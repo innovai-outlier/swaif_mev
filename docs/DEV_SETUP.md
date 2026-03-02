@@ -19,6 +19,8 @@
 6. Popular dados iniciais:
    - Criar admin: `docker compose -f infra/compose/docker-compose.yml exec api python -m app.seed_admin`
    - Criar dados completos: `docker compose -f infra/compose/docker-compose.yml exec api python -m app.seed_comprehensive`
+7. Popular dados do programa Young Forever (inspirados no livro):
+   - `docker compose -f infra/compose/docker-compose.yml exec api python -m app.seed_young_forever`
 
 ## Operação diária
 - Logs: `./scripts/logs.sh`

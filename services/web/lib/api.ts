@@ -1,20 +1,32 @@
+// Reminders
+export async function getReminders(userId?: number, habitId?: number) {
+  let params = "";
+  if (userId) params += `user_id=${userId}`;
+  if (habitId) params += (params ? "&" : "") + `habit_id=${habitId}`;
+  params = params ? `?${params}` : "";
+  return fetchAPI(`/api/v1/reminders/${params}`);
+}
 // API client for Motor Clínico backend
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+export const API_BASE_URL = "https://friendly-guide-jj7g669x6qpp2p6qr-8000.app.github.dev";
+  //process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
-  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const response = await fetch(url, {
     ...options,
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...options.headers,
     },
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
+    const error = await response
+      .json()
+      .catch(() => ({ detail: "Unknown error" }));
     throw new Error(error.detail || `API Error: ${response.status}`);
   }
 
@@ -27,7 +39,7 @@ async function fetchAPI(endpoint: string, options: RequestInit = {}) {
 
 // Programs
 export async function getPrograms() {
-  return fetchAPI('/api/v1/programs/');
+  return fetchAPI("/api/v1/programs/");
 }
 
 export async function getProgram(id: number) {
@@ -40,12 +52,16 @@ export async function getProgramHabits(programId: number) {
 
 // Habits
 export async function getHabits(programId?: number) {
-  const params = programId ? `?program_id=${programId}` : '';
+  const params = programId ? `?program_id=${programId}` : "";
   return fetchAPI(`/api/v1/habits/${params}`);
 }
 
 // Check-ins
-export async function getCheckIns(userId: number, startDate?: string, endDate?: string) {
+export async function getCheckIns(
+  userId: number,
+  startDate?: string,
+  endDate?: string,
+) {
   let params = `?user_id=${userId}`;
   if (startDate) params += `&start_date=${startDate}`;
   if (endDate) params += `&end_date=${endDate}`;
@@ -58,8 +74,8 @@ export async function createCheckIn(data: {
   check_in_date: string;
   notes?: string;
 }) {
-  return fetchAPI('/api/v1/check-ins/', {
-    method: 'POST',
+  return fetchAPI("/api/v1/check-ins/", {
+    method: "POST",
     body: JSON.stringify(data),
   });
 }
@@ -70,12 +86,12 @@ export async function getUserDashboard(userId: number) {
 }
 
 export async function getUserPoints(userId: number, programId?: number) {
-  const params = programId ? `?program_id=${programId}` : '';
+  const params = programId ? `?program_id=${programId}` : "";
   return fetchAPI(`/api/v1/users/${userId}/points/${params}`);
 }
 
 export async function getUserPointsHistory(userId: number, programId?: number) {
-  const params = programId ? `?program_id=${programId}` : '';
+  const params = programId ? `?program_id=${programId}` : "";
   return fetchAPI(`/api/v1/users/${userId}/points/history/${params}`);
 }
 
@@ -89,7 +105,7 @@ export async function getUserBadges(userId: number) {
 
 // Badges
 export async function getBadges() {
-  return fetchAPI('/api/v1/badges/');
+  return fetchAPI("/api/v1/badges/");
 }
 
 // Enrollments
@@ -101,14 +117,14 @@ export async function createEnrollment(data: {
   user_id: number;
   program_id: number;
 }) {
-  return fetchAPI('/api/v1/enrollments/', {
-    method: 'POST',
+  return fetchAPI("/api/v1/enrollments/", {
+    method: "POST",
     body: JSON.stringify(data),
   });
 }
 
 export async function cancelEnrollment(enrollmentId: number) {
   return fetchAPI(`/api/v1/enrollments/${enrollmentId}/`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 }

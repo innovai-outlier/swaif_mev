@@ -1,9 +1,10 @@
-'use client';
+"use client";
 
-import AdminHeader from '@/components/AdminHeader';
-import { ErrorAlert, PageLoading, StatCard } from '@/components/UIComponents';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import AdminHeader from "@/components/AdminHeader";
+import { ErrorAlert, PageLoading, StatCard } from "@/components/UIComponents";
+import { API_BASE_URL } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface AnalyticsOverview {
   overview: {
@@ -61,9 +62,10 @@ export default function AdminAnalyticsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [overview, setOverview] = useState<AnalyticsOverview | null>(null);
-  const [programPerformance, setProgramPerformance] = useState<ProgramPerformance | null>(null);
+  const [programPerformance, setProgramPerformance] =
+    useState<ProgramPerformance | null>(null);
   const [badgeStats, setBadgeStats] = useState<BadgeStatistics | null>(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchAnalytics();
@@ -72,26 +74,30 @@ export default function AdminAnalyticsPage() {
   const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
       const headers = {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       };
 
       // Fetch all analytics endpoints
       const [overviewRes, programsRes, badgesRes] = await Promise.all([
-        fetch('http://localhost:8000/api/v1/admin/analytics/overview', { headers }),
-        fetch('http://localhost:8000/api/v1/admin/analytics/program-performance', { headers }),
-        fetch('http://localhost:8000/api/v1/admin/analytics/badge-statistics', { headers }),
+        fetch(`${API_BASE_URL}/api/v1/admin/analytics/overview`, { headers }),
+        fetch(`${API_BASE_URL}/api/v1/admin/analytics/program-performance`, {
+          headers,
+        }),
+        fetch(`${API_BASE_URL}/api/v1/admin/analytics/badge-statistics`, {
+          headers,
+        }),
       ]);
 
       if (!overviewRes.ok || !programsRes.ok || !badgesRes.ok) {
-        throw new Error('Failed to fetch analytics');
+        throw new Error("Failed to fetch analytics");
       }
 
       const [overviewData, programsData, badgesData] = await Promise.all([
@@ -104,8 +110,8 @@ export default function AdminAnalyticsPage() {
       setProgramPerformance(programsData);
       setBadgeStats(badgesData);
     } catch (err) {
-      console.error('Error fetching analytics:', err);
-      setError('Falha ao carregar analytics. Por favor, tente novamente.');
+      console.error("Error fetching analytics:", err);
+      setError("Falha ao carregar analytics. Por favor, tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -120,7 +126,7 @@ export default function AdminAnalyticsPage() {
       <div className="min-h-screen bg-gray-50">
         <AdminHeader />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <ErrorAlert message={error} onDismiss={() => setError('')} />
+          <ErrorAlert message={error} onDismiss={() => setError("")} />
           <button
             onClick={fetchAnalytics}
             className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -139,8 +145,12 @@ export default function AdminAnalyticsPage() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Analytics do Sistema</h1>
-          <p className="mt-2 text-gray-600">Métricas e insights de engajamento da plataforma</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Analytics do Sistema
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Métricas e insights de engajamento da plataforma
+          </p>
         </div>
 
         {/* Overview Cards */}
@@ -210,22 +220,31 @@ export default function AdminAnalyticsPage() {
               </div>
               <div className="p-6">
                 {overview.top_performers.most_active_users.length === 0 ? (
-                  <p className="text-gray-500 text-center">Nenhum dado disponível</p>
+                  <p className="text-gray-500 text-center">
+                    Nenhum dado disponível
+                  </p>
                 ) : (
                   <div className="space-y-3">
-                    {overview.top_performers.most_active_users.map((user, index) => (
-                      <div key={user.user_id} className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <span className="text-lg font-bold text-gray-400 w-6">
-                            {index + 1}
+                    {overview.top_performers.most_active_users.map(
+                      (user, index) => (
+                        <div
+                          key={user.user_id}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center">
+                            <span className="text-lg font-bold text-gray-400 w-6">
+                              {index + 1}
+                            </span>
+                            <span className="ml-3 text-gray-900">
+                              {user.full_name}
+                            </span>
+                          </div>
+                          <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {user.checkin_count} check-ins
                           </span>
-                          <span className="ml-3 text-gray-900">{user.full_name}</span>
                         </div>
-                        <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                          {user.checkin_count} check-ins
-                        </span>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 )}
               </div>
@@ -240,22 +259,31 @@ export default function AdminAnalyticsPage() {
               </div>
               <div className="p-6">
                 {overview.top_performers.most_popular_programs.length === 0 ? (
-                  <p className="text-gray-500 text-center">Nenhum dado disponível</p>
+                  <p className="text-gray-500 text-center">
+                    Nenhum dado disponível
+                  </p>
                 ) : (
                   <div className="space-y-3">
-                    {overview.top_performers.most_popular_programs.map((program, index) => (
-                      <div key={program.program_id} className="flex items-center justify-between">
-                        <div className="flex items-center">
-                          <span className="text-lg font-bold text-gray-400 w-6">
-                            {index + 1}
+                    {overview.top_performers.most_popular_programs.map(
+                      (program, index) => (
+                        <div
+                          key={program.program_id}
+                          className="flex items-center justify-between"
+                        >
+                          <div className="flex items-center">
+                            <span className="text-lg font-bold text-gray-400 w-6">
+                              {index + 1}
+                            </span>
+                            <span className="ml-3 text-gray-900">
+                              {program.program_name}
+                            </span>
+                          </div>
+                          <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                            {program.enrollment_count} inscrições
                           </span>
-                          <span className="ml-3 text-gray-900">{program.program_name}</span>
                         </div>
-                        <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                          {program.enrollment_count} inscrições
-                        </span>
-                      </div>
-                    ))}
+                      ),
+                    )}
                   </div>
                 )}
               </div>
@@ -326,7 +354,8 @@ export default function AdminAnalyticsPage() {
                 🏆 Estatísticas de Badges
               </h2>
               <p className="text-sm text-gray-500 mt-1">
-                {badgeStats.total_badges_awarded} badges distribuídos de {badgeStats.total_badges_defined} disponíveis
+                {badgeStats.total_badges_awarded} badges distribuídos de{" "}
+                {badgeStats.total_badges_defined} disponíveis
               </p>
             </div>
             <div className="overflow-x-auto">

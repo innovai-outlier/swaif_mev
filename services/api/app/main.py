@@ -16,6 +16,7 @@ from app.routers import (
     admin_analytics,
     protocol_templates,
     protocol_runs,
+    reminders
 )
 
 app = FastAPI(
@@ -27,7 +28,7 @@ app = FastAPI(
 # CORS middleware for web frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,6 +48,7 @@ app.include_router(badges.router)
 app.include_router(enrollments.router)
 app.include_router(protocol_templates.router)
 app.include_router(protocol_runs.router)
+app.include_router(reminders.router)
 
 
 @app.get("/health")

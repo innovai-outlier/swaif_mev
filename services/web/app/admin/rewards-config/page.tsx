@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { API_BASE_URL } from "@/lib/api";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface RewardConfig {
   config_key: string;
@@ -38,11 +39,14 @@ export default function RewardsConfigPage() {
 
   const fetchConfigs = async (token: string) => {
     try {
-      const response = await fetch("http://localhost:8000/api/v1/admin/rewards/config", {
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/admin/rewards/config`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) throw new Error("Failed to fetch configs");
 
@@ -58,7 +62,9 @@ export default function RewardsConfigPage() {
   const handleValueChange = (configKey: string, newValue: string) => {
     const numValue = parseInt(newValue) || 0;
     setConfigs(
-      configs.map((c) => (c.config_key === configKey ? { ...c, config_value: numValue } : c))
+      configs.map((c) =>
+        c.config_key === configKey ? { ...c, config_value: numValue } : c,
+      ),
     );
   };
 
@@ -71,14 +77,17 @@ export default function RewardsConfigPage() {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token");
 
-      const response = await fetch("http://localhost:8000/api/v1/admin/rewards/config", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/admin/rewards/config`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ configs }),
         },
-        body: JSON.stringify({ configs }),
-      });
+      );
 
       if (!response.ok) throw new Error("Failed to save configs");
 
@@ -92,7 +101,8 @@ export default function RewardsConfigPage() {
   };
 
   const handleReset = async () => {
-    if (!confirm("Tem certeza que deseja restaurar as configurações padrão?")) return;
+    if (!confirm("Tem certeza que deseja restaurar as configurações padrão?"))
+      return;
 
     setError("");
     setSuccess("");
@@ -102,12 +112,15 @@ export default function RewardsConfigPage() {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No authentication token");
 
-      const response = await fetch("http://localhost:8000/api/v1/admin/rewards/config/reset", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
+      const response = await fetch(
+        `${API_BASE_URL}/api/v1/admin/rewards/config/reset`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) throw new Error("Failed to reset configs");
 
@@ -134,11 +147,23 @@ export default function RewardsConfigPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link href="/admin" className="text-gray-500 hover:text-gray-700">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                  />
                 </svg>
               </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Configurar Recompensas</h1>
+              <h1 className="text-3xl font-bold text-gray-900">
+                Configurar Recompensas
+              </h1>
             </div>
           </div>
         </div>
@@ -161,7 +186,9 @@ export default function RewardsConfigPage() {
 
           <div className="bg-white shadow rounded-lg overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-              <h2 className="text-lg font-semibold text-gray-900">Sistema de Pontuação</h2>
+              <h2 className="text-lg font-semibold text-gray-900">
+                Sistema de Pontuação
+              </h2>
               <p className="text-sm text-gray-600 mt-1">
                 Configure os valores de pontos para diferentes ações e marcos
               </p>
@@ -169,24 +196,36 @@ export default function RewardsConfigPage() {
 
             <div className="divide-y divide-gray-200">
               {configs.map((config) => (
-                <div key={config.config_key} className="px-6 py-4 hover:bg-gray-50">
+                <div
+                  key={config.config_key}
+                  className="px-6 py-4 hover:bg-gray-50"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <label htmlFor={config.config_key} className="block text-sm font-medium text-gray-900">
+                      <label
+                        htmlFor={config.config_key}
+                        className="block text-sm font-medium text-gray-900"
+                      >
                         {config.description}
                       </label>
-                      <p className="text-xs text-gray-500 mt-1">{config.config_key}</p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        {config.config_key}
+                      </p>
                     </div>
                     <div className="ml-4 flex items-center space-x-2">
                       <input
                         type="number"
                         id={config.config_key}
                         value={config.config_value}
-                        onChange={(e) => handleValueChange(config.config_key, e.target.value)}
+                        onChange={(e) =>
+                          handleValueChange(config.config_key, e.target.value)
+                        }
                         className="w-24 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         min="0"
                       />
-                      <span className="text-sm text-gray-600 font-medium">pts</span>
+                      <span className="text-sm text-gray-600 font-medium">
+                        pts
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -215,14 +254,23 @@ export default function RewardsConfigPage() {
           {/* Info Box */}
           <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
             <div className="flex">
-              <svg className="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 text-blue-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                  clipRule="evenodd"
+                />
               </svg>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-blue-800">Dica</h3>
                 <p className="text-sm text-blue-700 mt-1">
-                  As configurações de pontos afetarão todas as novas ações dos pacientes. 
-                  Alterações não afetarão pontos já concedidos anteriormente.
+                  As configurações de pontos afetarão todas as novas ações dos
+                  pacientes. Alterações não afetarão pontos já concedidos
+                  anteriormente.
                 </p>
               </div>
             </div>
