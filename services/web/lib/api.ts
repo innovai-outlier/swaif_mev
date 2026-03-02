@@ -7,11 +7,27 @@ export async function getReminders(userId?: number, habitId?: number) {
   return fetchAPI(`/api/v1/reminders/${params}`);
 }
 // API client for Motor Clínico backend
-export const API_BASE_URL = "https://friendly-guide-jj7g669x6qpp2p6qr-8000.app.github.dev";
-  //process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+const FALLBACK_API_BASE_URL = "http://localhost:8000";
+let didWarnMissingApiBaseUrl = false;
+
+function resolveApiBaseUrl() {
+  const configuredApiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL?.trim();
+
+  if (!configuredApiBaseUrl && !didWarnMissingApiBaseUrl) {
+    console.warn(
+      "NEXT_PUBLIC_API_BASE_URL is not set. Falling back to http://localhost:8000.",
+    );
+    didWarnMissingApiBaseUrl = true;
+  }
+
+  return (configuredApiBaseUrl || FALLBACK_API_BASE_URL).replace(/\/+$/, "");
+}
+
+export const API_BASE_URL = resolveApiBaseUrl();
 
 async function fetchAPI(endpoint: string, options: RequestInit = {}) {
-  const url = `${API_BASE_URL}${endpoint}`;
+  const normalizedEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const url = `${API_BASE_URL}${normalizedEndpoint}`;
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const response = await fetch(url, {
