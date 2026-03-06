@@ -9,7 +9,7 @@ ACTION="${1:-start}"
 
 case "$ACTION" in
   start)
-    start_service "worker" "$ROOT_DIR/services/worker" "python -m app.main"
+    start_service "worker" "$ROOT_DIR/services/worker" "${WORKER_START_CMD:-python -m app.main}"
     ;;
   stop)
     stop_service "worker"
